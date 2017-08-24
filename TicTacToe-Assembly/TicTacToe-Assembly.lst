@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/23/17 16:46:28
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/23/17 19:25:02
 TicTacToe.asm						     Page 1 - 1
 
 
@@ -84,21 +84,30 @@ TicTacToe.asm						     Page 1 - 1
 	   0D 00
 				           "        |       |       ",10,13,
 				           "        |       |       ",10,13,
-				           " -------+-------+-------",10,13,
+				           " -------+-------+-------",10,13, 
 				           " 4      |5      |6      ",10,13,
 				           "        |       |       ",10,13,
 				           "        |       |       ",10,13,
 				           " -------+-------+-------",10,13,
-				           " 7      |8      |9      ",10,13,
+				           " 7      |8      |9      ",10,13, 
 				           "        |       |       ",10,13,
 				           "        |       |       ",10,13,0
+ 0000011F 00000000		winsX DWORD 0
+ 00000123 00000000		winsO DWORD 0
 
  00000000			.code
+				printIntro       PROTO
+				printBoard       PROTO
+				chooseX          PROTO
+				chooseO          PROTO
+				checkWinner      PROTO
+				printOutro       PROTO
+
  00000000			main PROC
  00000000  68 00000000 R	     push OFFSET board
- 00000005  E8 0000000C		     call showBoard
+ 00000005  E8 0000000C		     call printBoard
 
-				     ; pause for debugging
+				     ; pause before closing window
  0000000A  E8 00000000 E	     call WaitMsg
 					
 				     exit
@@ -106,10 +115,18 @@ TicTacToe.asm						     Page 1 - 1
  00000011  E8 00000000 E   *	    call   ExitProcess
  00000016			main ENDP
 
+				; Prints intro.
+				;    Receives: nothing
+				;    Returns:  nothing
+ 00000016			printIntro PROC
+				     ; procedure code here
+
+ 00000016			printIntro ENDP
+
 				; Prints board.
 				;    Receives: [ebp + 8] = address of board
 				;    Returns:  nothing
- 00000016			showBoard PROC
+ 00000016			printBoard PROC
 				    ; prepare stack frame
  00000016  55			     push ebp
  00000017  8B EC		     mov  ebp,esp
@@ -123,11 +140,84 @@ TicTacToe.asm						     Page 1 - 1
  00000022  61			     popad
  00000023  5D			     pop  ebp
  00000024  C2 0004		     ret  4
+ 00000027			printBoard ENDP
 
- 00000027			showBoard ENDP
+				; Prompts player to choose a location on board to place an X. Validates input and
+				; will only accept a number between 1 and 9. Cells to place at are as follows:
+				; 1 = 30, 2 = 38, 3 = 46, 4 = 134, 5 = 142, 6 = 150, 7 = 238, 8 = 246, 9 = 254
+				;    Receives: [ebp + 8] = address of board
+				;    Returns:  nothing
+ 00000027			chooseX PROC
+				    ; prepare stack frame
+ 00000027  55			     push ebp
+ 00000028  8B EC		     mov  ebp,esp
+ 0000002A  60			     pushad
+
+				     ; procedure code here
+
+				     ; clean up stack frame
+ 0000002B  61			     popad
+ 0000002C  5D			     pop  ebp
+ 0000002D  C2 0004		     ret 4
+ 00000030			chooseX ENDP
+
+				; Prompts player to choose a location on board to place an O. Validates input and
+				; will only accept a number between 1 and 9. Cells to place at are as follows:
+				; 1 = 30, 2 = 38, 3 = 46, 4 = 134, 5 = 142, 6 = 150, 7 = 238, 8 = 246, 9 = 254
+				;    Receives: [ebp + 8] = address of board
+				;    Returns:  nothing
+ 00000030			chooseO PROC
+				    ; prepare stack frame
+ 00000030  55			     push ebp
+ 00000031  8B EC		     mov  ebp,esp
+ 00000033  60			     pushad
+
+				     ; procedure code here
+
+				     ; clean up stack frame
+ 00000034  61			     popad
+ 00000035  5D			     pop  ebp
+ 00000036  C2 0004		     ret 4
+ 00000039			chooseO ENDP
+
+				; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
+				; done by looking at particular cells in the board array. For example, a run in the
+				; first row would mean that cells 30, 38, and 46 would all be either X or O.
+				;    Receives: [ebp + 8] = address of board  
+				;    Returns:  nothing
+ 00000039			checkWinner PROC
+				    ; prepare stack frame
+ 00000039  55			     push ebp
+ 0000003A  8B EC		     mov  ebp,esp
+ 0000003C  60			     pushad
+
+				     ; procedure code here
+
+				     ; clean up stack frame
+ 0000003D  61			     popad
+ 0000003E  5D			     pop  ebp
+ 0000003F  C3			     ret
+ 00000040			checkWinner ENDP
+
+				; Prints outro.
+				;    Receives: nothing
+				;    Returns:  nothing
+ 00000040			printOutro PROC
+				    ; prepare stack frame
+ 00000040  55			     push ebp
+ 00000041  8B EC		     mov  ebp,esp
+ 00000043  60			     pushad
+
+				     ; procedure code here
+
+				     ; clean up stack frame
+ 00000044  61			     popad
+ 00000045  5D			     pop  ebp
+ 00000046  C3			     ret
+ 00000047			printOutro ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/23/17 16:46:28
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/23/17 19:25:02
 TicTacToe.asm						     Symbols 2 - 1
 
 
@@ -221,8 +311,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000011F Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000027 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000127 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000047 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -329,10 +419,15 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+checkWinner  . . . . . . . . . .	P Near	 00000039 _TEXT	Length= 00000007 Public STDCALL
+chooseO  . . . . . . . . . . . .	P Near	 00000030 _TEXT	Length= 00000009 Public STDCALL
+chooseX  . . . . . . . . . . . .	P Near	 00000027 _TEXT	Length= 00000009 Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
+printBoard . . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 00000011 Public STDCALL
+printIntro . . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 00000000 Public STDCALL
+printOutro . . . . . . . . . . .	P Near	 00000040 _TEXT	Length= 00000007 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-showBoard  . . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 00000011 Public STDCALL
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -566,6 +661,8 @@ lightRed . . . . . . . . . . . .	Number	 0000000Ch
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
+winsO  . . . . . . . . . . . . .	DWord	 00000123 _DATA	
+winsX  . . . . . . . . . . . . .	DWord	 0000011F _DATA	
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
 
