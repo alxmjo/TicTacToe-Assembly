@@ -16,6 +16,10 @@ board BYTE " 1      |2      |3      ",10,13,
            "        |       |       ",10,13,0
 winsX DWORD 0
 winsO DWORD 0
+sIntro BYTE "Welcome to TicTacToessembly!",0
+sXturn BYTE "X's turn. Choose a square: ",0
+sOturn BYTE "O's turn. Choose a square: ",0
+sInvalidChoice BYTE "Invalid choice. Choose a square: ",0
 
 .code
 printIntro       PROTO
@@ -26,6 +30,8 @@ checkWinner      PROTO
 printOutro       PROTO
 
 main PROC
+     call printIntro
+     
      push OFFSET board
      call printBoard
 
@@ -39,8 +45,11 @@ main ENDP
 ;    Receives: nothing
 ;    Returns:  nothing
 printIntro PROC
-     ; procedure code here
-
+     mov edx,OFFSET sIntro
+     call WriteString
+     call Crlf
+     call Crlf
+     ret
 printIntro ENDP
 
 ; Prints board.

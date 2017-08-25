@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/23/17 19:25:02
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/24/17 19:07:11
 TicTacToe.asm						     Page 1 - 1
 
 
@@ -94,6 +94,31 @@ TicTacToe.asm						     Page 1 - 1
 				           "        |       |       ",10,13,0
  0000011F 00000000		winsX DWORD 0
  00000123 00000000		winsO DWORD 0
+ 00000127 57 65 6C 63 6F	sIntro BYTE "Welcome to TicTacToessembly!",0
+	   6D 65 20 74 6F
+	   20 54 69 63 54
+	   61 63 54 6F 65
+	   73 73 65 6D 62
+	   6C 79 21 00
+ 00000144 58 27 73 20 74	sXturn BYTE "X's turn. Choose a square: ",0
+	   75 72 6E 2E 20
+	   43 68 6F 6F 73
+	   65 20 61 20 73
+	   71 75 61 72 65
+	   3A 20 00
+ 00000160 4F 27 73 20 74	sOturn BYTE "O's turn. Choose a square: ",0
+	   75 72 6E 2E 20
+	   43 68 6F 6F 73
+	   65 20 61 20 73
+	   71 75 61 72 65
+	   3A 20 00
+ 0000017C 49 6E 76 61 6C	sInvalidChoice BYTE "Invalid choice. Choose a square: ",0
+	   69 64 20 63 68
+	   6F 69 63 65 2E
+	   20 43 68 6F 6F
+	   73 65 20 61 20
+	   73 71 75 61 72
+	   65 3A 20 00
 
  00000000			.code
 				printIntro       PROTO
@@ -104,120 +129,125 @@ TicTacToe.asm						     Page 1 - 1
 				printOutro       PROTO
 
  00000000			main PROC
- 00000000  68 00000000 R	     push OFFSET board
- 00000005  E8 0000000C		     call printBoard
+ 00000000  E8 00000016		     call printIntro
+				     
+ 00000005  68 00000000 R	     push OFFSET board
+ 0000000A  E8 00000021		     call printBoard
 
 				     ; pause before closing window
- 0000000A  E8 00000000 E	     call WaitMsg
+ 0000000F  E8 00000000 E	     call WaitMsg
 					
 				     exit
- 0000000F  6A 00	   *	    push   +000000000h
- 00000011  E8 00000000 E   *	    call   ExitProcess
- 00000016			main ENDP
+ 00000014  6A 00	   *	    push   +000000000h
+ 00000016  E8 00000000 E   *	    call   ExitProcess
+ 0000001B			main ENDP
 
 				; Prints intro.
 				;    Receives: nothing
 				;    Returns:  nothing
- 00000016			printIntro PROC
-				     ; procedure code here
-
- 00000016			printIntro ENDP
+ 0000001B			printIntro PROC
+ 0000001B  BA 00000127 R	     mov edx,OFFSET sIntro
+ 00000020  E8 00000000 E	     call WriteString
+ 00000025  E8 00000000 E	     call Crlf
+ 0000002A  E8 00000000 E	     call Crlf
+ 0000002F  C3			     ret
+ 00000030			printIntro ENDP
 
 				; Prints board.
 				;    Receives: [ebp + 8] = address of board
 				;    Returns:  nothing
- 00000016			printBoard PROC
+ 00000030			printBoard PROC
 				    ; prepare stack frame
- 00000016  55			     push ebp
- 00000017  8B EC		     mov  ebp,esp
- 00000019  60			     pushad
+ 00000030  55			     push ebp
+ 00000031  8B EC		     mov  ebp,esp
+ 00000033  60			     pushad
 
 				     ; print board
- 0000001A  8B 55 08		     mov edx,[ebp + 8]
- 0000001D  E8 00000000 E	     call WriteString
+ 00000034  8B 55 08		     mov edx,[ebp + 8]
+ 00000037  E8 00000000 E	     call WriteString
 
 				     ; clean up stack frame
- 00000022  61			     popad
- 00000023  5D			     pop  ebp
- 00000024  C2 0004		     ret  4
- 00000027			printBoard ENDP
+ 0000003C  61			     popad
+ 0000003D  5D			     pop  ebp
+ 0000003E  C2 0004		     ret  4
+ 00000041			printBoard ENDP
 
 				; Prompts player to choose a location on board to place an X. Validates input and
 				; will only accept a number between 1 and 9. Cells to place at are as follows:
 				; 1 = 30, 2 = 38, 3 = 46, 4 = 134, 5 = 142, 6 = 150, 7 = 238, 8 = 246, 9 = 254
 				;    Receives: [ebp + 8] = address of board
 				;    Returns:  nothing
- 00000027			chooseX PROC
+ 00000041			chooseX PROC
 				    ; prepare stack frame
- 00000027  55			     push ebp
- 00000028  8B EC		     mov  ebp,esp
- 0000002A  60			     pushad
+ 00000041  55			     push ebp
+ 00000042  8B EC		     mov  ebp,esp
+ 00000044  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 0000002B  61			     popad
- 0000002C  5D			     pop  ebp
- 0000002D  C2 0004		     ret 4
- 00000030			chooseX ENDP
+ 00000045  61			     popad
+ 00000046  5D			     pop  ebp
+ 00000047  C2 0004		     ret 4
+ 0000004A			chooseX ENDP
 
 				; Prompts player to choose a location on board to place an O. Validates input and
 				; will only accept a number between 1 and 9. Cells to place at are as follows:
 				; 1 = 30, 2 = 38, 3 = 46, 4 = 134, 5 = 142, 6 = 150, 7 = 238, 8 = 246, 9 = 254
 				;    Receives: [ebp + 8] = address of board
 				;    Returns:  nothing
- 00000030			chooseO PROC
+ 0000004A			chooseO PROC
 				    ; prepare stack frame
- 00000030  55			     push ebp
- 00000031  8B EC		     mov  ebp,esp
- 00000033  60			     pushad
+ 0000004A  55			     push ebp
+ 0000004B  8B EC		     mov  ebp,esp
+ 0000004D  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 00000034  61			     popad
- 00000035  5D			     pop  ebp
- 00000036  C2 0004		     ret 4
- 00000039			chooseO ENDP
+ 0000004E  61			     popad
+ 0000004F  5D			     pop  ebp
+ 00000050  C2 0004		     ret 4
+ 00000053			chooseO ENDP
 
 				; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 				; done by looking at particular cells in the board array. For example, a run in the
 				; first row would mean that cells 30, 38, and 46 would all be either X or O.
 				;    Receives: [ebp + 8] = address of board  
 				;    Returns:  nothing
- 00000039			checkWinner PROC
+ 00000053			checkWinner PROC
 				    ; prepare stack frame
- 00000039  55			     push ebp
- 0000003A  8B EC		     mov  ebp,esp
- 0000003C  60			     pushad
+ 00000053  55			     push ebp
+ 00000054  8B EC		     mov  ebp,esp
+ 00000056  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 0000003D  61			     popad
- 0000003E  5D			     pop  ebp
- 0000003F  C3			     ret
- 00000040			checkWinner ENDP
+ 00000057  61			     popad
+ 00000058  5D			     pop  ebp
+ 00000059  C3			     ret
+ 0000005A			checkWinner ENDP
 
 				; Prints outro.
 				;    Receives: nothing
 				;    Returns:  nothing
- 00000040			printOutro PROC
+ 0000005A			printOutro PROC
 				    ; prepare stack frame
- 00000040  55			     push ebp
- 00000041  8B EC		     mov  ebp,esp
- 00000043  60			     pushad
+ 0000005A  55			     push ebp
+ 0000005B  8B EC		     mov  ebp,esp
+ 0000005D  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 00000044  61			     popad
- 00000045  5D			     pop  ebp
- 00000046  C3			     ret
- 00000047			printOutro ENDP
+ 0000005E  61			     popad
+ 0000005F  5D			     pop  ebp
+ 00000060  C3			     ret
+ 00000061			printOutro ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/23/17 19:25:02
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/24/17 19:07:11
 TicTacToe.asm						     Symbols 2 - 1
 
 
@@ -311,8 +341,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000127 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000047 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000019E Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000061 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -419,13 +449,13 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-checkWinner  . . . . . . . . . .	P Near	 00000039 _TEXT	Length= 00000007 Public STDCALL
-chooseO  . . . . . . . . . . . .	P Near	 00000030 _TEXT	Length= 00000009 Public STDCALL
-chooseX  . . . . . . . . . . . .	P Near	 00000027 _TEXT	Length= 00000009 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
-printBoard . . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 00000011 Public STDCALL
-printIntro . . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 00000000 Public STDCALL
-printOutro . . . . . . . . . . .	P Near	 00000040 _TEXT	Length= 00000007 Public STDCALL
+checkWinner  . . . . . . . . . .	P Near	 00000053 _TEXT	Length= 00000007 Public STDCALL
+chooseO  . . . . . . . . . . . .	P Near	 0000004A _TEXT	Length= 00000009 Public STDCALL
+chooseX  . . . . . . . . . . . .	P Near	 00000041 _TEXT	Length= 00000009 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001B Public STDCALL
+printBoard . . . . . . . . . . .	P Near	 00000030 _TEXT	Length= 00000011 Public STDCALL
+printIntro . . . . . . . . . . .	P Near	 0000001B _TEXT	Length= 00000015 Public STDCALL
+printOutro . . . . . . . . . . .	P Near	 0000005A _TEXT	Length= 00000007 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -660,6 +690,10 @@ lightMagenta . . . . . . . . . .	Number	 0000000Dh
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 red  . . . . . . . . . . . . . .	Number	 00000004h   
+sIntro . . . . . . . . . . . . .	Byte	 00000127 _DATA	
+sInvalidChoice . . . . . . . . .	Byte	 0000017C _DATA	
+sOturn . . . . . . . . . . . . .	Byte	 00000160 _DATA	
+sXturn . . . . . . . . . . . . .	Byte	 00000144 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 winsO  . . . . . . . . . . . . .	DWord	 00000123 _DATA	
 winsX  . . . . . . . . . . . . .	DWord	 0000011F _DATA	
