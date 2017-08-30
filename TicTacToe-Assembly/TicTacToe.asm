@@ -14,27 +14,38 @@ board BYTE " 1      |2      |3      ",10,13,
            " 7      |8      |9      ",10,13, 
            "        |       |       ",10,13,
            "        |       |       ",10,13,0
-winsX DWORD 0
-winsO DWORD 0
+playerX BYTE 'X'
+playerY BYTE 'O'
+playerXwins DWORD 0
+playerOwins DWORD 0
 sIntro BYTE "Welcome to TicTacToessembly!",0
-sXturn BYTE "X's turn. Choose a square: ",0
-sOturn BYTE "O's turn. Choose a square: ",0
+sTurn BYTE "'s turn. Choose a square: ",0
 sInvalidChoice BYTE "Invalid choice. Choose a square: ",0
 
 .code
 printIntro       PROTO
 printBoard       PROTO
-chooseX          PROTO
-chooseO          PROTO
+chooseSquare     PROTO   
 checkWinner      PROTO
 printOutro       PROTO
 
 main PROC
+     ; print intro
      call printIntro
      
+     ; prompt for choices until game is won
+Run:     
      push OFFSET board
      call printBoard
 
+     push OFFSET board
+     push OFFSET currentPiece
+     call chooseSquare
+     
+     ; check if game over
+     jmp Run
+
+Finish:
      ; pause before closing window
      call WaitMsg
 	
@@ -83,6 +94,7 @@ chooseX PROC
      pushad
 
      ; procedure code here
+
 
      ; clean up stack frame
      popad
