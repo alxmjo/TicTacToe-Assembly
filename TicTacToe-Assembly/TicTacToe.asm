@@ -56,6 +56,10 @@ Run:
      je Run
 
 Finish:
+     ; for testing
+     push OFFSET board
+     call printBoard
+     
      ; print outro
      call printOutro
      
@@ -117,10 +121,118 @@ Validate:
      call ReadDec
      mov  choice,eax
      cmp  choice,9
-     ja   Invalid            ; value for terms too high, jump to Invalid
+     ja   Invalid             ; value for terms too high, jump to Invalid
      cmp  choice,1
-     jb   Invalid            ; value for terms too low, jump to Invalid
+     jb   Invalid             ; value for terms too low, jump to Invalid
+     cmp choice,1                         
+     je Place1                ; place at cell 1
+     cmp choice,2                         
+     je Place2                ; place at cell 2
+     cmp choice,3                         
+     je Place3                ; place at cell 3
+     cmp choice,4                         
+     je Place4                ; place at cell 4
+     cmp choice,5                         
+     je Place5                ; place at cell 5
+     cmp choice,6                         
+     je Place6                ; place at cell 6
+     cmp choice,7                         
+     je Place7                ; place at cell 7
+     cmp choice,8                         
+     je Place8                ; place at cell 8
+     cmp choice,9                         
+     je Place9                ; place at cell 9
      jmp  Finish
+
+Place1:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,30               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place2:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,38               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place3:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,46               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place4:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,134               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place5:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,142               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place6:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,150               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place7:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,238               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place8:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,246               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
+
+Place9:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,254               ; increment esi to correct cell
+     mov bl,' '
+     cmp [esi],bl             ; check if cell is empty
+     jne Invalid              ; jump if cell is not empty
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov [esi],bl             ; move bl into address pointed to by esi
+     jmp Finish
 
 Invalid:
      mov  edx,OFFSET sInvalidChoice

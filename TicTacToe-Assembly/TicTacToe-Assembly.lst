@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/31/17 10:48:05
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/31/17 11:38:26
 TicTacToe.asm						     Page 1 - 1
 
 
@@ -30,7 +30,7 @@ TicTacToe.asm						     Page 1 - 1
 	   20 7C 33 20 20
 	   20 20 20 20 0A
 	   0D 20 20 20 20
-	   20 20 20 20 7C
+	   58 20 20 20 7C
 	   20 20 20 20 20
 	   20 20 7C 20 20
 	   20 20 20 20 20
@@ -82,7 +82,7 @@ TicTacToe.asm						     Page 1 - 1
 	   20 7C 20 20 20
 	   20 20 20 20 0A
 	   0D 00
-				           "        |       |       ",10,13,
+				           "    X   |       |       ",10,13,
 				           "        |       |       ",10,13,
 				           " -------+-------+-------",10,13, 
 				           " 4      |5      |6      ",10,13,
@@ -128,69 +128,73 @@ TicTacToe.asm						     Page 1 - 1
 
  00000000			main PROC
 				     ; print intro
- 00000000  E8 00000045		     call printIntro
+ 00000000  E8 0000004F		     call printIntro
 				     
 				     ; prompt for choices until game is won
  00000005			Run:     
  00000005  68 00000000 R	     push OFFSET board
- 0000000A  E8 00000050		     call printBoard
+ 0000000A  E8 0000005A		     call printBoard
 
  0000000F  A0 00000121 R	     mov al,currentPlayer
  00000014  50			     push eax
  00000015  68 00000000 R	     push OFFSET board
- 0000001A  E8 00000051		     call chooseSquare
+ 0000001A  E8 0000005B		     call chooseSquare
 				     
  0000001F  A0 00000121 R	     mov al,currentPlayer
  00000024  50			     push eax
- 00000025  E8 0000008B		     call switchPlayer
+ 00000025  E8 000001E2		     call switchPlayer
 				     
 				     ; check if game over
  0000002A  68 00000000 R	     push OFFSET board
- 0000002F  E8 00000088		     call checkWinner
+ 0000002F  E8 000001DF		     call checkWinner
  00000034  83 F8 00		     cmp eax,0
  00000037  74 CC		     je Run
 
  00000039			Finish:
+				     ; for testing
+ 00000039  68 00000000 R	     push OFFSET board
+ 0000003E  E8 00000026		     call printBoard
+				     
 				     ; print outro
- 00000039  E8 00000085		     call printOutro
+ 00000043  E8 000001D2		     call printOutro
 				     
 				     ; pause before closing window
- 0000003E  E8 00000000 E	     call WaitMsg
+ 00000048  E8 00000000 E	     call WaitMsg
 					
 				     exit
- 00000043  6A 00	   *	    push   +000000000h
- 00000045  E8 00000000 E   *	    call   ExitProcess
- 0000004A			main ENDP
+ 0000004D  6A 00	   *	    push   +000000000h
+ 0000004F  E8 00000000 E   *	    call   ExitProcess
+ 00000054			main ENDP
 
 				; Prints intro.
 				;    Receives: nothing
 				;    Returns:  nothing
- 0000004A			printIntro PROC
- 0000004A  BA 00000126 R	     mov edx,OFFSET sIntro
- 0000004F  E8 00000000 E	     call WriteString
- 00000054  E8 00000000 E	     call Crlf
- 00000059  E8 00000000 E	     call Crlf
- 0000005E  C3			     ret
- 0000005F			printIntro ENDP
+ 00000054			printIntro PROC
+ 00000054  BA 00000126 R	     mov edx,OFFSET sIntro
+ 00000059  E8 00000000 E	     call WriteString
+ 0000005E  E8 00000000 E	     call Crlf
+ 00000063  E8 00000000 E	     call Crlf
+ 00000068  C3			     ret
+ 00000069			printIntro ENDP
 
 				; Prints board.
 				;    Receives: [ebp + 8] = address of board
 				;    Returns:  nothing
- 0000005F			printBoard PROC
+ 00000069			printBoard PROC
 				    ; prepare stack frame
- 0000005F  55			     push ebp
- 00000060  8B EC		     mov  ebp,esp
- 00000062  60			     pushad
+ 00000069  55			     push ebp
+ 0000006A  8B EC		     mov  ebp,esp
+ 0000006C  60			     pushad
 
 				     ; print board
- 00000063  8B 55 08		     mov edx,[ebp + 8]
- 00000066  E8 00000000 E	     call WriteString
+ 0000006D  8B 55 08		     mov edx,[ebp + 8]
+ 00000070  E8 00000000 E	     call WriteString
 
 				     ; clean up stack frame
- 0000006B  61			     popad
- 0000006C  5D			     pop  ebp
- 0000006D  C2 0004		     ret  4
- 00000070			printBoard ENDP
+ 00000075  61			     popad
+ 00000076  5D			     pop  ebp
+ 00000077  C2 0004		     ret  4
+ 0000007A			printBoard ENDP
 
 				; Prompts player to choose a location on board to place an X. Validates input and
 				; will only accept a number between 1 and 9. Cells to place at are as follows:
@@ -198,98 +202,215 @@ TicTacToe.asm						     Page 1 - 1
 				;    Receives: [ebp +  8] = address of board
 				;              [ebp + 12] = currentPlayer
 				;    Returns:  nothing
- 00000070			chooseSquare PROC
+ 0000007A			chooseSquare PROC
 				    ; prepare stack frame
- 00000070  55			     push ebp
- 00000071  8B EC		     mov  ebp,esp
- 00000073  60			     pushad
+ 0000007A  55			     push ebp
+ 0000007B  8B EC		     mov  ebp,esp
+ 0000007D  60			     pushad
 
 				     ; loop until choice entered
- 00000074  8B 45 0C		     mov  eax,[ebp + 12]
- 00000077  E8 00000000 E	     call WriteChar
- 0000007C  BA 00000143 R	     mov edx,OFFSET sTurn
- 00000081  E8 00000000 E	     call WriteString
+ 0000007E  8B 45 0C		     mov  eax,[ebp + 12]
+ 00000081  E8 00000000 E	     call WriteChar
+ 00000086  BA 00000143 R	     mov edx,OFFSET sTurn
+ 0000008B  E8 00000000 E	     call WriteString
 
- 00000086			Validate:
- 00000086  E8 00000000 E	     call ReadDec
- 0000008B  A3 00000122 R	     mov  choice,eax
- 00000090  83 3D 00000122 R	     cmp  choice,9
+ 00000090			Validate:
+ 00000090  E8 00000000 E	     call ReadDec
+ 00000095  A3 00000122 R	     mov  choice,eax
+ 0000009A  83 3D 00000122 R	     cmp  choice,9
 	   09
- 00000097  77 0B		     ja   Invalid            ; value for terms too high, jump to Invalid
- 00000099  83 3D 00000122 R	     cmp  choice,1
+ 000000A1  0F 87 00000151	     ja   Invalid             ; value for terms too high, jump to Invalid
+ 000000A7  83 3D 00000122 R	     cmp  choice,1
 	   01
- 000000A0  72 02		     jb   Invalid            ; value for terms too low, jump to Invalid
- 000000A2  EB 0C		     jmp  Finish
+ 000000AE  0F 82 00000144	     jb   Invalid             ; value for terms too low, jump to Invalid
+ 000000B4  83 3D 00000122 R	     cmp choice,1                         
+	   01
+ 000000BB  74 69		     je Place1                ; place at cell 1
+ 000000BD  83 3D 00000122 R	     cmp choice,2                         
+	   02
+ 000000C4  74 7A		     je Place2                ; place at cell 2
+ 000000C6  83 3D 00000122 R	     cmp choice,3                         
+	   03
+ 000000CD  0F 84 00000087	     je Place3                ; place at cell 3
+ 000000D3  83 3D 00000122 R	     cmp choice,4                         
+	   04
+ 000000DA  0F 84 00000094	     je Place4                ; place at cell 4
+ 000000E0  83 3D 00000122 R	     cmp choice,5                         
+	   05
+ 000000E7  0F 84 0000009D	     je Place5                ; place at cell 5
+ 000000ED  83 3D 00000122 R	     cmp choice,6                         
+	   06
+ 000000F4  0F 84 000000A6	     je Place6                ; place at cell 6
+ 000000FA  83 3D 00000122 R	     cmp choice,7                         
+	   07
+ 00000101  0F 84 000000AF	     je Place7                ; place at cell 7
+ 00000107  83 3D 00000122 R	     cmp choice,8                         
+	   08
+ 0000010E  0F 84 000000B8	     je Place8                ; place at cell 8
+ 00000114  83 3D 00000122 R	     cmp choice,9                         
+	   09
+ 0000011B  0F 84 000000C1	     je Place9                ; place at cell 9
+ 00000121  E9 000000E1		     jmp  Finish
 
- 000000A4			Invalid:
- 000000A4  BA 0000015E R	     mov  edx,OFFSET sInvalidChoice
- 000000A9  E8 00000000 E	     call WriteString
- 000000AE  EB D6		     jmp  Validate
+ 00000126			Place1:
+ 00000126  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 00000129  83 C6 1E		     add esi,30               ; increment esi to correct cell
+ 0000012C  B3 20		     mov bl,' '
+ 0000012E  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 00000130  0F 85 000000C2	     jne Invalid              ; jump if cell is not empty
+ 00000136  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 00000139  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 0000013B  E9 000000C7		     jmp Finish
 
- 000000B0			Finish:
+ 00000140			Place2:
+ 00000140  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 00000143  83 C6 26		     add esi,38               ; increment esi to correct cell
+ 00000146  B3 20		     mov bl,' '
+ 00000148  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 0000014A  0F 85 000000A8	     jne Invalid              ; jump if cell is not empty
+ 00000150  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 00000153  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 00000155  E9 000000AD		     jmp Finish
+
+ 0000015A			Place3:
+ 0000015A  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 0000015D  83 C6 2E		     add esi,46               ; increment esi to correct cell
+ 00000160  B3 20		     mov bl,' '
+ 00000162  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 00000164  0F 85 0000008E	     jne Invalid              ; jump if cell is not empty
+ 0000016A  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 0000016D  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 0000016F  E9 00000093		     jmp Finish
+
+ 00000174			Place4:
+ 00000174  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 00000177  81 C6 00000086	     add esi,134               ; increment esi to correct cell
+ 0000017D  B3 20		     mov bl,' '
+ 0000017F  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 00000181  75 75		     jne Invalid              ; jump if cell is not empty
+ 00000183  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 00000186  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 00000188  EB 7D		     jmp Finish
+
+ 0000018A			Place5:
+ 0000018A  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 0000018D  81 C6 0000008E	     add esi,142               ; increment esi to correct cell
+ 00000193  B3 20		     mov bl,' '
+ 00000195  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 00000197  75 5F		     jne Invalid              ; jump if cell is not empty
+ 00000199  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 0000019C  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 0000019E  EB 67		     jmp Finish
+
+ 000001A0			Place6:
+ 000001A0  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000001A3  81 C6 00000096	     add esi,150               ; increment esi to correct cell
+ 000001A9  B3 20		     mov bl,' '
+ 000001AB  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 000001AD  75 49		     jne Invalid              ; jump if cell is not empty
+ 000001AF  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 000001B2  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 000001B4  EB 51		     jmp Finish
+
+ 000001B6			Place7:
+ 000001B6  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000001B9  81 C6 000000EE	     add esi,238               ; increment esi to correct cell
+ 000001BF  B3 20		     mov bl,' '
+ 000001C1  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 000001C3  75 33		     jne Invalid              ; jump if cell is not empty
+ 000001C5  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 000001C8  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 000001CA  EB 3B		     jmp Finish
+
+ 000001CC			Place8:
+ 000001CC  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000001CF  81 C6 000000F6	     add esi,246               ; increment esi to correct cell
+ 000001D5  B3 20		     mov bl,' '
+ 000001D7  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 000001D9  75 1D		     jne Invalid              ; jump if cell is not empty
+ 000001DB  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 000001DE  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 000001E0  EB 25		     jmp Finish
+
+ 000001E2			Place9:
+ 000001E2  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000001E5  81 C6 000000FE	     add esi,254               ; increment esi to correct cell
+ 000001EB  B3 20		     mov bl,' '
+ 000001ED  38 1E		     cmp [esi],bl             ; check if cell is empty
+ 000001EF  75 07		     jne Invalid              ; jump if cell is not empty
+ 000001F1  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
+ 000001F4  88 1E		     mov [esi],bl             ; move bl into address pointed to by esi
+ 000001F6  EB 0F		     jmp Finish
+
+ 000001F8			Invalid:
+ 000001F8  BA 0000015E R	     mov  edx,OFFSET sInvalidChoice
+ 000001FD  E8 00000000 E	     call WriteString
+ 00000202  E9 FFFFFE89		     jmp  Validate
+
+ 00000207			Finish:
 				     ; clean up stack frame
- 000000B0  61			     popad
- 000000B1  5D			     pop  ebp
- 000000B2  C2 0008		     ret 8
- 000000B5			chooseSquare ENDP
+ 00000207  61			     popad
+ 00000208  5D			     pop  ebp
+ 00000209  C2 0008		     ret 8
+ 0000020C			chooseSquare ENDP
 
 				; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 				; done by looking at particular cells in the board array. For example, a run in the
 				; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
 				;    Receives: [ebp + 8] = address of board  
 				;    Returns:  0 in EAX if no winner found, 1 in EAX if winner found
- 000000B5			switchPlayer PROC
+ 0000020C			switchPlayer PROC
 				    ; prepare stack frame
- 000000B5  55			     push ebp
- 000000B6  8B EC		     mov  ebp,esp
- 000000B8  60			     pushad
+ 0000020C  55			     push ebp
+ 0000020D  8B EC		     mov  ebp,esp
+ 0000020F  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 000000B9  61			     popad
- 000000BA  5D			     pop  ebp
- 000000BB  C3			     ret
- 000000BC			switchPlayer ENDP
+ 00000210  61			     popad
+ 00000211  5D			     pop  ebp
+ 00000212  C3			     ret
+ 00000213			switchPlayer ENDP
 
 				; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 				; done by looking at particular cells in the board array. For example, a run in the
 				; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
 				;    Receives: [ebp + 8] = address of board  
 				;    Returns:  0 in EAX if no winner found, 1 in EAX if winner found
- 000000BC			checkWinner PROC
+ 00000213			checkWinner PROC
 				    ; prepare stack frame
- 000000BC  55			     push ebp
- 000000BD  8B EC		     mov  ebp,esp
- 000000BF  60			     pushad
+ 00000213  55			     push ebp
+ 00000214  8B EC		     mov  ebp,esp
+ 00000216  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 000000C0  61			     popad
- 000000C1  5D			     pop  ebp
- 000000C2  C3			     ret
- 000000C3			checkWinner ENDP
+ 00000217  61			     popad
+ 00000218  5D			     pop  ebp
+ 00000219  C3			     ret
+ 0000021A			checkWinner ENDP
 
 				; Prints outro.
 				;    Receives: nothing
 				;    Returns:  nothing
- 000000C3			printOutro PROC
+ 0000021A			printOutro PROC
 				    ; prepare stack frame
- 000000C3  55			     push ebp
- 000000C4  8B EC		     mov  ebp,esp
- 000000C6  60			     pushad
+ 0000021A  55			     push ebp
+ 0000021B  8B EC		     mov  ebp,esp
+ 0000021D  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 000000C7  61			     popad
- 000000C8  5D			     pop  ebp
- 000000C9  C3			     ret
- 000000CA			printOutro ENDP
+ 0000021E  61			     popad
+ 0000021F  5D			     pop  ebp
+ 00000220  C3			     ret
+ 00000221			printOutro ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/31/17 10:48:05
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    08/31/17 11:38:26
 TicTacToe.asm						     Symbols 2 - 1
 
 
@@ -384,7 +505,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000187 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000CA Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000221 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -491,20 +612,29 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-checkWinner  . . . . . . . . . .	P Near	 000000BC _TEXT	Length= 00000007 Public STDCALL
-chooseSquare . . . . . . . . . .	P Near	 00000070 _TEXT	Length= 00000045 Public STDCALL
-  Validate . . . . . . . . . . .	L Near	 00000086 _TEXT	
-  Invalid  . . . . . . . . . . .	L Near	 000000A4 _TEXT	
-  Finish . . . . . . . . . . . .	L Near	 000000B0 _TEXT	
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000004A Public STDCALL
+checkWinner  . . . . . . . . . .	P Near	 00000213 _TEXT	Length= 00000007 Public STDCALL
+chooseSquare . . . . . . . . . .	P Near	 0000007A _TEXT	Length= 00000192 Public STDCALL
+  Validate . . . . . . . . . . .	L Near	 00000090 _TEXT	
+  Place1 . . . . . . . . . . . .	L Near	 00000126 _TEXT	
+  Place2 . . . . . . . . . . . .	L Near	 00000140 _TEXT	
+  Place3 . . . . . . . . . . . .	L Near	 0000015A _TEXT	
+  Place4 . . . . . . . . . . . .	L Near	 00000174 _TEXT	
+  Place5 . . . . . . . . . . . .	L Near	 0000018A _TEXT	
+  Place6 . . . . . . . . . . . .	L Near	 000001A0 _TEXT	
+  Place7 . . . . . . . . . . . .	L Near	 000001B6 _TEXT	
+  Place8 . . . . . . . . . . . .	L Near	 000001CC _TEXT	
+  Place9 . . . . . . . . . . . .	L Near	 000001E2 _TEXT	
+  Invalid  . . . . . . . . . . .	L Near	 000001F8 _TEXT	
+  Finish . . . . . . . . . . . .	L Near	 00000207 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000054 Public STDCALL
   Run  . . . . . . . . . . . . .	L Near	 00000005 _TEXT	
   Finish . . . . . . . . . . . .	L Near	 00000039 _TEXT	
-printBoard . . . . . . . . . . .	P Near	 0000005F _TEXT	Length= 00000011 Public STDCALL
-printIntro . . . . . . . . . . .	P Near	 0000004A _TEXT	Length= 00000015 Public STDCALL
-printOutro . . . . . . . . . . .	P Near	 000000C3 _TEXT	Length= 00000007 Public STDCALL
+printBoard . . . . . . . . . . .	P Near	 00000069 _TEXT	Length= 00000011 Public STDCALL
+printIntro . . . . . . . . . . .	P Near	 00000054 _TEXT	Length= 00000015 Public STDCALL
+printOutro . . . . . . . . . . .	P Near	 0000021A _TEXT	Length= 00000007 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-switchPlayer . . . . . . . . . .	P Near	 000000B5 _TEXT	Length= 00000007 Public STDCALL
+switchPlayer . . . . . . . . . .	P Near	 0000020C _TEXT	Length= 00000007 Public STDCALL
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
