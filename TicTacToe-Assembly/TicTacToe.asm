@@ -284,10 +284,96 @@ CheckRow1:
      jne CheckRow2            ; no winner here, so check next row, column, or diagonal
      jmp WinnerFound          ; if we've made it this far then we have a winner
 
-     ; TODO: Continue copying CheckRow2, CheckRow3 for all rows columns diags
+CheckRow2:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,134              ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckRow3            ; no winner here, so check next row, column, or diagonal
+     add esi,8                ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckRow3            ; no winner here, so check next row, column, or diagonal
+     add esi,8                ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckRow3            ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
 
-CheckSquare2:
-     jmp NoWinnerFound ; for testing
+CheckRow3:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,238              ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn1         ; no winner here, so check next row, column, or diagonal
+     add esi,8                ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn1         ; no winner here, so check next row, column, or diagonal
+     add esi,8                ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn1         ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+CheckColumn1:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,30               ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn2         ; no winner here, so check next row, column, or diagonal
+     add esi,104              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn2         ; no winner here, so check next row, column, or diagonal
+     add esi,104              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn2         ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+CheckColumn2:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,38               ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn3         ; no winner here, so check next row, column, or diagonal
+     add esi,104              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn3         ; no winner here, so check next row, column, or diagonal
+     add esi,104              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckColumn3         ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+CheckColumn3:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,46               ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckDiagonal1       ; no winner here, so check next row, column, or diagonal
+     add esi,104              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckDiagonal1       ; no winner here, so check next row, column, or diagonal
+     add esi,104              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckDiagonal1       ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+CheckDiagonal1:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,30               ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckDiagonal2       ; no winner here, so check next row, column, or diagonal
+     add esi,112              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckDiagonal2       ; no winner here, so check next row, column, or diagonal
+     add esi,112              ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckDiagonal2       ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+CheckDiagonal2:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,46               ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne NoWinnerFound        ; no winner here, so no winner at all
+     add esi,96               ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne NoWinnerFound        ; no winner here, so no winner at all
+     add esi,96               ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne NoWinnerFound        ; no winner here, so no winner at all
+     jmp WinnerFound          ; if we've made it this far then we have a winner
 
 WinnerFound:
      mov edx,1

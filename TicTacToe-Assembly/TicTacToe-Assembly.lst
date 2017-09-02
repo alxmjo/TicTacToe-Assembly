@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    09/01/17 20:33:39
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    09/02/17 08:11:48
 TicTacToe.asm						     Page 1 - 1
 
 
@@ -155,7 +155,7 @@ TicTacToe.asm						     Page 1 - 1
 
 				     ; switch to other player
  0000003E  68 00000121 R	     push OFFSET currentPlayer     ; push address of currentPlayer to stack
- 00000043  E8 00000212		     call switchPlayer
+ 00000043  E8 000002D5		     call switchPlayer
  00000048  EB BB		     jmp Play
 
  0000004A			Finish:
@@ -164,7 +164,7 @@ TicTacToe.asm						     Page 1 - 1
  0000004F  E8 00000026		     call printBoard
 				     
 				     ; print outro
- 00000054  E8 0000022B		     call printOutro
+ 00000054  E8 000002EE		     call printOutro
 				     
 				     ; pause before closing window
  00000059  E8 00000000 E	     call WaitMsg
@@ -379,101 +379,189 @@ TicTacToe.asm						     Page 1 - 1
  00000221  8A 5D 0C		     mov bl,[ebp + 12]        ; move currentPlayer into bl
  00000224  8B 7D 10		     mov edi,[ebp + 16]       ; store address of winner in edi
 
- 00000227			CheckSquare1:
+ 00000227			CheckRow1:
  00000227  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
  0000022A  83 C6 1E		     add esi,30               ; increment esi to correct cell
  0000022D  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
- 0000022F  75 10		     jne CheckSquare2         ; no winner here, so check next row, column, or diagonal
+ 0000022F  75 13		     jne CheckRow2            ; no winner here, so check next row, column, or diagonal
  00000231  83 C6 08		     add esi,8                ; increment esi to next cell
  00000234  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
- 00000236  75 09		     jne CheckSquare2         ; no winner here, so check next row, column, or diagonal
+ 00000236  75 0C		     jne CheckRow2            ; no winner here, so check next row, column, or diagonal
  00000238  83 C6 08		     add esi,8                ; increment esi to next cell
  0000023B  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
- 0000023D  75 02		     jne CheckSquare2         ; no winner here, so check next row, column, or diagonal
- 0000023F  EB 02		     jmp WinnerFound          ; if we've made it this far then we have a winner
+ 0000023D  75 05		     jne CheckRow2            ; no winner here, so check next row, column, or diagonal
+ 0000023F  E9 000000C2		     jmp WinnerFound          ; if we've made it this far then we have a winner
 
- 00000241			CheckSquare2:
- 00000241  EB 09		     jmp NoWinnerFound ; for testing
+ 00000244			CheckRow2:
+ 00000244  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 00000247  81 C6 00000086	     add esi,134              ; increment esi to correct cell
+ 0000024D  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 0000024F  75 13		     jne CheckRow3            ; no winner here, so check next row, column, or diagonal
+ 00000251  83 C6 08		     add esi,8                ; increment esi to next cell
+ 00000254  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 00000256  75 0C		     jne CheckRow3            ; no winner here, so check next row, column, or diagonal
+ 00000258  83 C6 08		     add esi,8                ; increment esi to next cell
+ 0000025B  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 0000025D  75 05		     jne CheckRow3            ; no winner here, so check next row, column, or diagonal
+ 0000025F  E9 000000A2		     jmp WinnerFound          ; if we've made it this far then we have a winner
 
- 00000243			WinnerFound:
- 00000243  BA 00000001		     mov edx,1
- 00000248  89 17		     mov [edi],edx
- 0000024A  EB 09		     jmp Finish
+ 00000264			CheckRow3:
+ 00000264  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 00000267  81 C6 000000EE	     add esi,238              ; increment esi to correct cell
+ 0000026D  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 0000026F  75 13		     jne CheckColumn1         ; no winner here, so check next row, column, or diagonal
+ 00000271  83 C6 08		     add esi,8                ; increment esi to next cell
+ 00000274  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 00000276  75 0C		     jne CheckColumn1         ; no winner here, so check next row, column, or diagonal
+ 00000278  83 C6 08		     add esi,8                ; increment esi to next cell
+ 0000027B  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 0000027D  75 05		     jne CheckColumn1         ; no winner here, so check next row, column, or diagonal
+ 0000027F  E9 00000082		     jmp WinnerFound          ; if we've made it this far then we have a winner
 
- 0000024C			NoWinnerFound:
- 0000024C  BA 00000000		     mov edx,0
- 00000251  89 17		     mov [edi],edx
- 00000253  EB 00		     jmp Finish
+ 00000284			CheckColumn1:
+ 00000284  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 00000287  83 C6 1E		     add esi,30               ; increment esi to correct cell
+ 0000028A  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 0000028C  75 10		     jne CheckColumn2         ; no winner here, so check next row, column, or diagonal
+ 0000028E  83 C6 68		     add esi,104              ; increment esi to next cell
+ 00000291  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 00000293  75 09		     jne CheckColumn2         ; no winner here, so check next row, column, or diagonal
+ 00000295  83 C6 68		     add esi,104              ; increment esi to next cell
+ 00000298  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 0000029A  75 02		     jne CheckColumn2         ; no winner here, so check next row, column, or diagonal
+ 0000029C  EB 68		     jmp WinnerFound          ; if we've made it this far then we have a winner
 
- 00000255			Finish:
+ 0000029E			CheckColumn2:
+ 0000029E  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000002A1  83 C6 26		     add esi,38               ; increment esi to correct cell
+ 000002A4  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002A6  75 10		     jne CheckColumn3         ; no winner here, so check next row, column, or diagonal
+ 000002A8  83 C6 68		     add esi,104              ; increment esi to next cell
+ 000002AB  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002AD  75 09		     jne CheckColumn3         ; no winner here, so check next row, column, or diagonal
+ 000002AF  83 C6 68		     add esi,104              ; increment esi to next cell
+ 000002B2  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002B4  75 02		     jne CheckColumn3         ; no winner here, so check next row, column, or diagonal
+ 000002B6  EB 4E		     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+ 000002B8			CheckColumn3:
+ 000002B8  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000002BB  83 C6 2E		     add esi,46               ; increment esi to correct cell
+ 000002BE  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002C0  75 10		     jne CheckDiagonal1       ; no winner here, so check next row, column, or diagonal
+ 000002C2  83 C6 68		     add esi,104              ; increment esi to next cell
+ 000002C5  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002C7  75 09		     jne CheckDiagonal1       ; no winner here, so check next row, column, or diagonal
+ 000002C9  83 C6 68		     add esi,104              ; increment esi to next cell
+ 000002CC  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002CE  75 02		     jne CheckDiagonal1       ; no winner here, so check next row, column, or diagonal
+ 000002D0  EB 34		     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+ 000002D2			CheckDiagonal1:
+ 000002D2  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000002D5  83 C6 1E		     add esi,30               ; increment esi to correct cell
+ 000002D8  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002DA  75 10		     jne CheckDiagonal2       ; no winner here, so check next row, column, or diagonal
+ 000002DC  83 C6 70		     add esi,112              ; increment esi to next cell
+ 000002DF  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002E1  75 09		     jne CheckDiagonal2       ; no winner here, so check next row, column, or diagonal
+ 000002E3  83 C6 70		     add esi,112              ; increment esi to next cell
+ 000002E6  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002E8  75 02		     jne CheckDiagonal2       ; no winner here, so check next row, column, or diagonal
+ 000002EA  EB 1A		     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+ 000002EC			CheckDiagonal2:
+ 000002EC  8B 75 08		     mov esi,[ebp + 8]        ; move address of board into esi
+ 000002EF  83 C6 2E		     add esi,46               ; increment esi to correct cell
+ 000002F2  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002F4  75 19		     jne NoWinnerFound        ; no winner here, so no winner at all
+ 000002F6  83 C6 60		     add esi,96               ; increment esi to next cell
+ 000002F9  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 000002FB  75 12		     jne NoWinnerFound        ; no winner here, so no winner at all
+ 000002FD  83 C6 60		     add esi,96               ; increment esi to next cell
+ 00000300  38 1E		     cmp [esi],bl             ; check if cell is the same as currentPlayer
+ 00000302  75 0B		     jne NoWinnerFound        ; no winner here, so no winner at all
+ 00000304  EB 00		     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+ 00000306			WinnerFound:
+ 00000306  BA 00000001		     mov edx,1
+ 0000030B  89 17		     mov [edi],edx
+ 0000030D  EB 09		     jmp Finish
+
+ 0000030F			NoWinnerFound:
+ 0000030F  BA 00000000		     mov edx,0
+ 00000314  89 17		     mov [edi],edx
+ 00000316  EB 00		     jmp Finish
+
+ 00000318			Finish:
 				     ; clean up stack frame
- 00000255  61			     popad
- 00000256  5D			     pop  ebp
- 00000257  C2 000C		     ret 12
- 0000025A			checkWinner ENDP
+ 00000318  61			     popad
+ 00000319  5D			     pop  ebp
+ 0000031A  C2 000C		     ret 12
+ 0000031D			checkWinner ENDP
 
 				; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 				; done by looking at particular cells in the board array. For example, a run in the
 				; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
 				;    Receives: [ebp + 8] = address of currentPlayer  
 				;    Returns:  0 in EAX if no winner found, 1 in EAX if winner found
- 0000025A			switchPlayer PROC
+ 0000031D			switchPlayer PROC
 				    ; prepare stack frame
- 0000025A  55			     push ebp
- 0000025B  8B EC		     mov  ebp,esp
- 0000025D  60			     pushad
+ 0000031D  55			     push ebp
+ 0000031E  8B EC		     mov  ebp,esp
+ 00000320  60			     pushad
 
 				     ; get currentPlayer char
- 0000025E  8B 75 08		     mov esi,[ebp + 8]        ; move address of currentPlayer into esi
- 00000261  8B 1E		     mov ebx,[esi]            ; move character pointed to by eax to ebx
+ 00000321  8B 75 08		     mov esi,[ebp + 8]        ; move address of currentPlayer into esi
+ 00000324  8B 1E		     mov ebx,[esi]            ; move character pointed to by eax to ebx
 
 				     ; prepare registers for comparison
- 00000263  B9 00000058		     mov ecx,'X'
- 00000268  BA 0000004F		     mov edx,'O'
+ 00000326  B9 00000058		     mov ecx,'X'
+ 0000032B  BA 0000004F		     mov edx,'O'
 
 				     ; compare 
- 0000026D  3A D9		     cmp bl,cl                ; currentPlayer is X so switch to O
- 0000026F  74 04		     je XtoO
- 00000271  3A DA		     cmp bl,dl                ; currentPlayer is O so switch to X
- 00000273  74 04		     je OtoX
+ 00000330  3A D9		     cmp bl,cl                ; currentPlayer is X so switch to O
+ 00000332  74 04		     je XtoO
+ 00000334  3A DA		     cmp bl,dl                ; currentPlayer is O so switch to X
+ 00000336  74 04		     je OtoX
 
 				     ; swap currentPlayer
- 00000275			XtoO:
- 00000275  8A DA		     mov bl,dl
- 00000277  EB 04		     jmp Finish
- 00000279			OtoX:
- 00000279  8A D9		     mov bl,cl
- 0000027B  EB 00		     jmp Finish
+ 00000338			XtoO:
+ 00000338  8A DA		     mov bl,dl
+ 0000033A  EB 04		     jmp Finish
+ 0000033C			OtoX:
+ 0000033C  8A D9		     mov bl,cl
+ 0000033E  EB 00		     jmp Finish
 				     
- 0000027D			Finish:
+ 00000340			Finish:
 				     ; move back into currentPlayer via address in esi
- 0000027D  88 1E		     mov [esi],bl
+ 00000340  88 1E		     mov [esi],bl
 
 				     ; clean up stack frame
- 0000027F  61			     popad
- 00000280  5D			     pop  ebp
- 00000281  C2 0004		     ret 4
- 00000284			switchPlayer ENDP
+ 00000342  61			     popad
+ 00000343  5D			     pop  ebp
+ 00000344  C2 0004		     ret 4
+ 00000347			switchPlayer ENDP
 
 				; Prints outro.
 				;    Receives: nothing
 				;    Returns:  nothing
- 00000284			printOutro PROC
+ 00000347			printOutro PROC
 				    ; prepare stack frame
- 00000284  55			     push ebp
- 00000285  8B EC		     mov  ebp,esp
- 00000287  60			     pushad
+ 00000347  55			     push ebp
+ 00000348  8B EC		     mov  ebp,esp
+ 0000034A  60			     pushad
 
 				     ; procedure code here
 
 				     ; clean up stack frame
- 00000288  61			     popad
- 00000289  5D			     pop  ebp
- 0000028A  C3			     ret
- 0000028B			printOutro ENDP
+ 0000034B  61			     popad
+ 0000034C  5D			     pop  ebp
+ 0000034D  C3			     ret
+ 0000034E			printOutro ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    09/01/17 20:33:39
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    09/02/17 08:11:48
 TicTacToe.asm						     Symbols 2 - 1
 
 
@@ -568,7 +656,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000028B Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000034E Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -675,12 +763,18 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-checkWinner  . . . . . . . . . .	P Near	 0000021D _TEXT	Length= 0000003D Public STDCALL
-  CheckSquare1 . . . . . . . . .	L Near	 00000227 _TEXT	
-  CheckSquare2 . . . . . . . . .	L Near	 00000241 _TEXT	
-  WinnerFound  . . . . . . . . .	L Near	 00000243 _TEXT	
-  NoWinnerFound  . . . . . . . .	L Near	 0000024C _TEXT	
-  Finish . . . . . . . . . . . .	L Near	 00000255 _TEXT	
+checkWinner  . . . . . . . . . .	P Near	 0000021D _TEXT	Length= 00000100 Public STDCALL
+  CheckRow1  . . . . . . . . . .	L Near	 00000227 _TEXT	
+  CheckRow2  . . . . . . . . . .	L Near	 00000244 _TEXT	
+  CheckRow3  . . . . . . . . . .	L Near	 00000264 _TEXT	
+  CheckColumn1 . . . . . . . . .	L Near	 00000284 _TEXT	
+  CheckColumn2 . . . . . . . . .	L Near	 0000029E _TEXT	
+  CheckColumn3 . . . . . . . . .	L Near	 000002B8 _TEXT	
+  CheckDiagonal1 . . . . . . . .	L Near	 000002D2 _TEXT	
+  CheckDiagonal2 . . . . . . . .	L Near	 000002EC _TEXT	
+  WinnerFound  . . . . . . . . .	L Near	 00000306 _TEXT	
+  NoWinnerFound  . . . . . . . .	L Near	 0000030F _TEXT	
+  Finish . . . . . . . . . . . .	L Near	 00000318 _TEXT	
 chooseSquare . . . . . . . . . .	P Near	 0000008B _TEXT	Length= 00000192 Public STDCALL
   Validate . . . . . . . . . . .	L Near	 000000A1 _TEXT	
   Place1 . . . . . . . . . . . .	L Near	 00000137 _TEXT	
@@ -699,13 +793,13 @@ main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000065 Public 
   Finish . . . . . . . . . . . .	L Near	 0000004A _TEXT	
 printBoard . . . . . . . . . . .	P Near	 0000007A _TEXT	Length= 00000011 Public STDCALL
 printIntro . . . . . . . . . . .	P Near	 00000065 _TEXT	Length= 00000015 Public STDCALL
-printOutro . . . . . . . . . . .	P Near	 00000284 _TEXT	Length= 00000007 Public STDCALL
+printOutro . . . . . . . . . . .	P Near	 00000347 _TEXT	Length= 00000007 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-switchPlayer . . . . . . . . . .	P Near	 0000025A _TEXT	Length= 0000002A Public STDCALL
-  XtoO . . . . . . . . . . . . .	L Near	 00000275 _TEXT	
-  OtoX . . . . . . . . . . . . .	L Near	 00000279 _TEXT	
-  Finish . . . . . . . . . . . .	L Near	 0000027D _TEXT	
+switchPlayer . . . . . . . . . .	P Near	 0000031D _TEXT	Length= 0000002A Public STDCALL
+  XtoO . . . . . . . . . . . . .	L Near	 00000338 _TEXT	
+  OtoX . . . . . . . . . . . . .	L Near	 0000033C _TEXT	
+  Finish . . . . . . . . . . . .	L Near	 00000340 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
