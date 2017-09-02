@@ -18,6 +18,7 @@ playerX        BYTE 'X'
 playerY        BYTE 'O'
 currentPlayer  BYTE 'X'
 choice         DWORD ?
+winner         DWORD 0
 sIntro         BYTE "Welcome to TicTacToessembly!",0
 sTurn          BYTE "'s turn. Choose a square: ",0
 sInvalidChoice BYTE "Invalid choice. Choose a square: ",0
@@ -27,8 +28,8 @@ sWins          BYTE " wins!",0
 printIntro       PROTO
 printBoard       PROTO
 chooseSquare     PROTO
-switchPlayer     PROTO
 checkWinner      PROTO
+switchPlayer     PROTO
 printOutro       PROTO
 
 main PROC
@@ -36,24 +37,31 @@ main PROC
      call printIntro
      
      ; prompt for choices until game is won
-Run:     
+Play:     
+     ; print board
      push OFFSET board
      call printBoard
 
-     mov al,currentPlayer
-     push eax
-     push OFFSET board
+     ; prompt player to choose square
+     mov al,currentPlayer          ; move currentPlayer (X or O) into al
+     push eax                      ; push currentPlayer (in al) to stack
+     push OFFSET board             ; push address of board to stack
      call chooseSquare
      
-     mov al,currentPlayer
-     push eax
-     call switchPlayer
-     
-     ; check if game over
-     push OFFSET board
+     ; check if game over    
+     push OFFSET winner            ; push address of winner to stack
+     mov al,currentPlayer          ; move currentPlayer (X or O) into al
+     push eax                      ; push currentPlayer (in al) to stack
+     push OFFSET board             ; push address of board to stack
      call checkWinner
-     cmp eax,0
-     je Run
+     mov eax,winner
+     cmp eax,1                     ; if winner/eax is 1, game is over
+     je Finish
+
+     ; switch to other player
+     push OFFSET currentPlayer     ; push address of currentPlayer to stack
+     call switchPlayer
+     jmp Play
 
 Finish:
      ; for testing
@@ -176,7 +184,7 @@ Place3:
 
 Place4:
      mov esi,[ebp + 8]        ; move address of board into esi
-     add esi,134               ; increment esi to correct cell
+     add esi,134              ; increment esi to correct cell
      mov bl,' '
      cmp [esi],bl             ; check if cell is empty
      jne Invalid              ; jump if cell is not empty
@@ -186,7 +194,7 @@ Place4:
 
 Place5:
      mov esi,[ebp + 8]        ; move address of board into esi
-     add esi,142               ; increment esi to correct cell
+     add esi,142              ; increment esi to correct cell
      mov bl,' '
      cmp [esi],bl             ; check if cell is empty
      jne Invalid              ; jump if cell is not empty
@@ -196,7 +204,7 @@ Place5:
 
 Place6:
      mov esi,[ebp + 8]        ; move address of board into esi
-     add esi,150               ; increment esi to correct cell
+     add esi,150              ; increment esi to correct cell
      mov bl,' '
      cmp [esi],bl             ; check if cell is empty
      jne Invalid              ; jump if cell is not empty
@@ -206,7 +214,7 @@ Place6:
 
 Place7:
      mov esi,[ebp + 8]        ; move address of board into esi
-     add esi,238               ; increment esi to correct cell
+     add esi,238              ; increment esi to correct cell
      mov bl,' '
      cmp [esi],bl             ; check if cell is empty
      jne Invalid              ; jump if cell is not empty
@@ -216,7 +224,7 @@ Place7:
 
 Place8:
      mov esi,[ebp + 8]        ; move address of board into esi
-     add esi,246               ; increment esi to correct cell
+     add esi,246              ; increment esi to correct cell
      mov bl,' '
      cmp [esi],bl             ; check if cell is empty
      jne Invalid              ; jump if cell is not empty
@@ -226,7 +234,7 @@ Place8:
 
 Place9:
      mov esi,[ebp + 8]        ; move address of board into esi
-     add esi,254               ; increment esi to correct cell
+     add esi,254              ; increment esi to correct cell
      mov bl,' '
      cmp [esi],bl             ; check if cell is empty
      jne Invalid              ; jump if cell is not empty
@@ -246,10 +254,62 @@ Finish:
      ret 8
 chooseSquare ENDP
 
+; Checks to see if either player has won by looking for runs of 3 X's or O's, depending
+; on whether the most recent move was made by X or O. This is done by looking at 
+; particular cell in the board array. For example, a run in the first row would mean
+; that cell 30, 38, and 46 would all be either X or O.
+;    Receives: [ebp +  8] = address of board  
+;              [ebp + 12] = currentPlayer
+;              [ebp + 16] = winner
+;    Returns:  0 in winner if no winner found, 1 in winner if winner found
+checkWinner PROC
+    ; prepare stack frame
+     push ebp
+     mov  ebp,esp
+     pushad
+
+     mov bl,[ebp + 12]        ; move currentPlayer into bl
+     mov edi,[ebp + 16]       ; store address of winner in edi
+
+CheckRow1:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     add esi,30               ; increment esi to correct cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckRow2            ; no winner here, so check next row, column, or diagonal
+     add esi,8                ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckRow2            ; no winner here, so check next row, column, or diagonal
+     add esi,8                ; increment esi to next cell
+     cmp [esi],bl             ; check if cell is the same as currentPlayer
+     jne CheckRow2            ; no winner here, so check next row, column, or diagonal
+     jmp WinnerFound          ; if we've made it this far then we have a winner
+
+     ; TODO: Continue copying CheckRow2, CheckRow3 for all rows columns diags
+
+CheckSquare2:
+     jmp NoWinnerFound ; for testing
+
+WinnerFound:
+     mov edx,1
+     mov [edi],edx
+     jmp Finish
+
+NoWinnerFound:
+     mov edx,0
+     mov [edi],edx
+     jmp Finish
+
+Finish:
+     ; clean up stack frame
+     popad
+     pop  ebp
+     ret 12
+checkWinner ENDP
+
 ; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 ; done by looking at particular cells in the board array. For example, a run in the
 ; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
-;    Receives: [ebp + 8] = address of board  
+;    Receives: [ebp + 8] = address of currentPlayer  
 ;    Returns:  0 in EAX if no winner found, 1 in EAX if winner found
 switchPlayer PROC
     ; prepare stack frame
@@ -257,32 +317,37 @@ switchPlayer PROC
      mov  ebp,esp
      pushad
 
-     ; procedure code here
+     ; get currentPlayer char
+     mov esi,[ebp + 8]        ; move address of currentPlayer into esi
+     mov ebx,[esi]            ; move character pointed to by eax to ebx
+
+     ; prepare registers for comparison
+     mov ecx,'X'
+     mov edx,'O'
+
+     ; compare 
+     cmp bl,cl                ; currentPlayer is X so switch to O
+     je XtoO
+     cmp bl,dl                ; currentPlayer is O so switch to X
+     je OtoX
+
+     ; swap currentPlayer
+XtoO:
+     mov bl,dl
+     jmp Finish
+OtoX:
+     mov bl,cl
+     jmp Finish
+     
+Finish:
+     ; move back into currentPlayer via address in esi
+     mov [esi],bl
 
      ; clean up stack frame
      popad
      pop  ebp
-     ret
+     ret 4
 switchPlayer ENDP
-
-; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
-; done by looking at particular cells in the board array. For example, a run in the
-; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
-;    Receives: [ebp + 8] = address of board  
-;    Returns:  0 in EAX if no winner found, 1 in EAX if winner found
-checkWinner PROC
-    ; prepare stack frame
-     push ebp
-     mov  ebp,esp
-     pushad
-
-     ; procedure code here
-
-     ; clean up stack frame
-     popad
-     pop  ebp
-     ret
-checkWinner ENDP
 
 ; Prints outro.
 ;    Receives: nothing
