@@ -183,7 +183,7 @@ printBoard PROC
      ret  4
 printBoard ENDP
 
-; Prompts player to choose a location on board to place an X. Validates input and
+; Prompts player to choose a location on board to place an X or O. Validates input and
 ; will only accept a number between 1 and 9. Cells to place at are as follows:
 ; 1 = 30, 2 = 38, 3 = 46, 4 = 134, 5 = 142, 6 = 150, 7 = 238, 8 = 246, 9 = 254
 ;    Receives: [ebp +  8] = address of board
@@ -627,11 +627,9 @@ PrintScores:
      ret 12
 processCats ENDP
 
-; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
-; done by looking at particular cells in the board array. For example, a run in the
-; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
+; Switches an X to an O or an O to an X.
 ;    Receives: [ebp + 8] = address of currentPlayer  
-;    Returns:  0 in EAX if no winner found, 1 in EAX if winner found
+;    Returns:  nothing
 switchPlayer PROC
     ; prepare stack frame
      push ebp
