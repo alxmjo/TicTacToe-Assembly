@@ -14,40 +14,50 @@ board BYTE " 1      |2      |3      ",10,13,
            " 7      |8      |9      ",10,13, 
            "        |       |       ",10,13,
            "        |       |       ",10,13,0
-playerX        BYTE 'X'
-playerY        BYTE 'O'
 currentPlayer  BYTE 'X'
 choice         DWORD ?
 winner         DWORD 0
+playerXwins    DWORD 0
+playerOwins    DWORD 0
+playAgainIn    BYTE 2 DUP (?)
 sIntro         BYTE "Welcome to TicTacToessembly!",0
+sPlayAgain     BYTE "Play again (y/n)? ",0
+sOutro         BYTE "Thanks for playing!",0
 sTurn          BYTE "'s turn. Choose a square: ",0
 sInvalidChoice BYTE "Invalid choice. Choose a square: ",0
 sWins          BYTE " wins!",0
+sWinCount      BYTE " wins: ",0
 
 .code
 printIntro       PROTO
 printBoard       PROTO
 chooseSquare     PROTO
 checkWinner      PROTO
+processWinner    PROTO
 switchPlayer     PROTO
 printOutro       PROTO
 
 main PROC
      ; print intro
      call printIntro
-     
-     ; prompt for choices until game is won
-Play:     
-     ; print board
+
+Play:  
+     ; print starting board
      push OFFSET board
      call printBoard
 
+     ; prompt for choices until game is won
+L1:   
      ; prompt player to choose square
      mov al,currentPlayer          ; move currentPlayer (X or O) into al
      push eax                      ; push currentPlayer (in al) to stack
      push OFFSET board             ; push address of board to stack
      call chooseSquare
      
+     ; print board after move
+     push OFFSET board
+     call printBoard
+
      ; check if game over    
      push OFFSET winner            ; push address of winner to stack
      mov al,currentPlayer          ; move currentPlayer (X or O) into al
@@ -56,18 +66,33 @@ Play:
      call checkWinner
      mov eax,winner
      cmp eax,1                     ; if winner/eax is 1, game is over
-     je Finish
+     je Win
 
      ; switch to other player
      push OFFSET currentPlayer     ; push address of currentPlayer to stack
      call switchPlayer
-     jmp Play
+     jmp L1
 
-Finish:
-     ; for testing
-     push OFFSET board
-     call printBoard
+Win:
+     push OFFSET playerOwins
+     push OFFSET playerXwins
+     mov al,currentPlayer          ; move currentPlayer (X or O) into al
+     push eax                      ; push currentPlayer (in al) to stack
+     call processWinner
      
+     ; prompt for another game
+     mov edx,OFFSET sPlayAgain
+     call WriteString
+     mov edx,OFFSET playAgainIn
+     mov ecx,2
+     call ReadString
+     mov al,playAgainIn
+     cmp al,'y'
+     je Play
+     cmp al,'n'
+     je Finish
+     
+Finish: 
      ; print outro
      call printOutro
      
@@ -392,6 +417,70 @@ Finish:
      ret 12
 checkWinner ENDP
 
+; Prints winner and increments that player's score.
+;    Receives: [ebp +  8] = currentPlayer
+;              [ebp + 12] = address of playerXwins
+;              [ebp + 16] = address of playerOwins
+;    Returns:  nothing
+processWinner PROC
+    ; prepare stack frame
+     push ebp
+     mov  ebp,esp
+     pushad
+
+     ; process arguments
+     mov eax,[ebp + 8]
+     mov esi,[ebp + 12]            ; move address of playerXwins into esi
+     mov edi,[ebp + 16]            ; move address of playerOwins into edi
+
+     ; print winner
+     call WriteChar
+     mov edx,OFFSET sWins
+     call WriteString
+     call Crlf
+
+     ; increment wins
+     cmp al,'X'
+     je IncrementXwins
+     cmp al,'O'
+     je IncrementOwins
+
+IncrementXwins:
+     mov ebx,[esi]
+     inc ebx
+     mov [esi],ebx
+     jmp PrintScores
+
+IncrementOwins:
+     mov ebx,[edi]
+     inc ebx
+     mov [edi],ebx
+     jmp PrintScores
+
+     ; print scores
+PrintScores:
+     mov al,'X'
+     call WriteChar
+     mov edx,OFFSET sWinCount
+     call WriteString
+     mov eax,[esi]
+     call WriteDec
+     call Crlf
+
+     mov al,'O'
+     call WriteChar
+     mov edx,OFFSET sWinCount
+     call WriteString
+     mov eax,[edi]
+     call WriteDec
+     call Crlf
+
+     ; clean up stack frame
+     popad
+     pop  ebp
+     ret 12
+processWinner ENDP
+
 ; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 ; done by looking at particular cells in the board array. For example, a run in the
 ; first row would mean that cells 30, 38, and 46 would all be either X or O. If winner
@@ -445,6 +534,9 @@ printOutro PROC
      pushad
 
      ; procedure code here
+     mov edx,OFFSET sOutro
+     call WriteString
+     call Crlf
 
      ; clean up stack frame
      popad
