@@ -1,4 +1,6 @@
 ; TicTacToe
+; by Alex Johnson
+; September 2, 2017
 
 include Irvine32.inc
     
@@ -19,29 +21,38 @@ choice         DWORD ?
 winner         DWORD 0
 playerXwins    DWORD 0
 playerOwins    DWORD 0
+catsCount      DWORD 0
 playAgainIn    BYTE 2 DUP (?)
 sIntro         BYTE "Welcome to TicTacToessembly!",0
 sPlayAgain     BYTE "Play again (y/n)? ",0
 sOutro         BYTE "Thanks for playing!",0
 sTurn          BYTE "'s turn. Choose a square: ",0
 sInvalidChoice BYTE "Invalid choice. Choose a square: ",0
+sCats          BYTE "Cats!",0
 sWins          BYTE " wins!",0
 sWinCount      BYTE " wins: ",0
+sCatsCount     Byte "Cats: ",0
 
 .code
-printIntro       PROTO
-printBoard       PROTO
-chooseSquare     PROTO
-checkWinner      PROTO
-processWinner    PROTO
-switchPlayer     PROTO
-printOutro       PROTO
+printIntro     PROTO
+clearBoard     PROTO
+printBoard     PROTO
+chooseSquare   PROTO
+checkWinner    PROTO
+processWinner  PROTO
+processCats    PROTO
+switchPlayer   PROTO
+printOutro     PROTO
 
 main PROC
      ; print intro
      call printIntro
 
 Play:  
+     ; clear board
+     push OFFSET board
+     call clearBoard
+     
      ; print starting board
      push OFFSET board
      call printBoard
@@ -67,6 +78,8 @@ L1:
      mov eax,winner
      cmp eax,1                     ; if winner/eax is 1, game is over
      je Win
+     cmp eax,2
+     je Cats
 
      ; switch to other player
      push OFFSET currentPlayer     ; push address of currentPlayer to stack
@@ -74,12 +87,22 @@ L1:
      jmp L1
 
 Win:
+     push OFFSET catsCount
      push OFFSET playerOwins
      push OFFSET playerXwins
      mov al,currentPlayer          ; move currentPlayer (X or O) into al
      push eax                      ; push currentPlayer (in al) to stack
      call processWinner
+     jmp PlayAgain
+
+Cats:
+     push OFFSET catsCount
+     push OFFSET playerOwins
+     push OFFSET playerXwins
+     call processCats
+     jmp PlayAgain
      
+PlayAgain:
      ; prompt for another game
      mov edx,OFFSET sPlayAgain
      call WriteString
@@ -112,6 +135,34 @@ printIntro PROC
      call Crlf
      ret
 printIntro ENDP
+
+; Clears board.
+;    Receives: [ebp + 8] = address of board
+;    Returns:  nothing
+clearBoard PROC
+    ; prepare stack frame
+     push ebp
+     mov  ebp,esp
+     pushad
+
+     ; clear board squares
+     mov esi,[ebp + 8]        ; move address of board into esi
+     mov bl,' '
+     mov [esi + 30],bl
+     mov [esi + 38],bl
+     mov [esi + 46],bl
+     mov [esi + 134],bl
+     mov [esi + 142],bl
+     mov [esi + 150],bl
+     mov [esi + 238],bl
+     mov [esi + 246],bl
+     mov [esi + 254],bl
+
+     ; clean up stack frame
+     popad
+     pop  ebp
+     ret  4
+clearBoard ENDP
 
 ; Prints board.
 ;    Receives: [ebp + 8] = address of board
@@ -286,7 +337,7 @@ chooseSquare ENDP
 ;    Receives: [ebp +  8] = address of board  
 ;              [ebp + 12] = currentPlayer
 ;              [ebp + 16] = winner
-;    Returns:  0 in winner if no winner found, 1 in winner if winner found
+;    Returns:  0 in winner if no winner found, 1 if winner found, 2 if cats
 checkWinner PROC
     ; prepare stack frame
      push ebp
@@ -391,22 +442,50 @@ CheckDiagonal2:
      mov esi,[ebp + 8]        ; move address of board into esi
      add esi,46               ; increment esi to correct cell
      cmp [esi],bl             ; check if cell is the same as currentPlayer
-     jne NoWinnerFound        ; no winner here, so no winner at all
+     jne CheckCats            ; no winner here, so no winner at all
      add esi,96               ; increment esi to next cell
      cmp [esi],bl             ; check if cell is the same as currentPlayer
-     jne NoWinnerFound        ; no winner here, so no winner at all
+     jne CheckCats            ; no winner here, so no winner at all
      add esi,96               ; increment esi to next cell
      cmp [esi],bl             ; check if cell is the same as currentPlayer
-     jne NoWinnerFound        ; no winner here, so no winner at all
+     jne CheckCats            ; no winner here, so no winner at all
      jmp WinnerFound          ; if we've made it this far then we have a winner
+
+CheckCats:
+     mov esi,[ebp + 8]        ; move address of board into esi
+     mov bl,' '
+     cmp [esi + 30],bl        ; check if cell is empty
+     je NoWinnerFound         ; cell is empty, so can't be cats
+     cmp [esi + 38],bl
+     je NoWinnerFound
+     cmp [esi + 46],bl
+     je NoWinnerFound
+     cmp [esi + 134],bl
+     je NoWinnerFound
+     cmp [esi + 142],bl
+     je NoWinnerFound
+     cmp [esi + 150],bl
+     je NoWinnerFound
+     cmp [esi + 238],bl
+     je NoWinnerFound
+     cmp [esi + 246],bl
+     je NoWinnerFound
+     cmp [esi + 254],bl
+     je NoWinnerFound
+     jmp CatsFound
+
+NoWinnerFound:
+     mov edx,0
+     mov [edi],edx
+     jmp Finish
 
 WinnerFound:
      mov edx,1
      mov [edi],edx
      jmp Finish
 
-NoWinnerFound:
-     mov edx,0
+CatsFound:
+     mov edx,2
      mov [edi],edx
      jmp Finish
 
@@ -421,6 +500,7 @@ checkWinner ENDP
 ;    Receives: [ebp +  8] = currentPlayer
 ;              [ebp + 12] = address of playerXwins
 ;              [ebp + 16] = address of playerOwins
+;              [ebp + 20] = address of catsCount
 ;    Returns:  nothing
 processWinner PROC
     ; prepare stack frame
@@ -459,6 +539,7 @@ IncrementOwins:
 
      ; print scores
 PrintScores:
+     mov esi,[ebp + 12]             ; move address of playerXwins into esi
      mov al,'X'
      call WriteChar
      mov edx,OFFSET sWinCount
@@ -467,11 +548,76 @@ PrintScores:
      call WriteDec
      call Crlf
 
+     mov esi,[ebp + 16]            ; move address of playerOwins into esi
      mov al,'O'
      call WriteChar
      mov edx,OFFSET sWinCount
      call WriteString
-     mov eax,[edi]
+     mov eax,[esi]
+     call WriteDec
+     call Crlf
+
+     mov esi,[ebp + 20]            ; move address of catsCount into esi
+     mov edx,OFFSET sCatsCount
+     call WriteString
+     mov eax,[esi]
+     call WriteDec
+     call Crlf
+
+     ; clean up stack frame
+     popad
+     pop  ebp
+     ret 16
+processWinner ENDP
+
+; Prints cats and increments catsCount.
+;    Receives: [ebp +  8] = address of playerXwins
+;              [ebp + 12] = address of playerOwins
+;              [ebp + 16] = address of catsCount
+;    Returns:  nothing
+processCats PROC
+    ; prepare stack frame
+     push ebp
+     mov  ebp,esp
+     pushad
+
+     ; print cats!
+     mov edx,OFFSET sCats
+     call WriteString
+     call Crlf
+
+     ; increment cats
+IncrementCats:
+     mov esi,[ebp + 16]            ; move address of catsCount into esi
+     mov ebx,[esi]
+     inc ebx
+     mov [esi],ebx
+     jmp PrintScores
+
+     ; print scores
+PrintScores:
+     mov esi,[ebp + 8]             ; move address of playerXwins into esi
+     mov al,'X'
+     call WriteChar
+     mov edx,OFFSET sWinCount
+     call WriteString
+     mov eax,[esi]
+     call WriteDec
+     call Crlf
+
+     mov esi,[ebp + 12]            ; move address of playerOwins into esi
+     mov al,'O'
+     call WriteChar
+     mov edx,OFFSET sWinCount
+     call WriteString
+     mov eax,[esi]
+     call WriteDec
+     call Crlf
+
+     mov esi,[ebp + 16]            ; move address of catsCount into esi
+     mov edx,OFFSET sCatsCount
+     call WriteString
+     mov eax,[esi]
      call WriteDec
      call Crlf
 
@@ -479,7 +625,7 @@ PrintScores:
      popad
      pop  ebp
      ret 12
-processWinner ENDP
+processCats ENDP
 
 ; Checks to see if either player has won by looking for runs of 3 X's or O's. This is
 ; done by looking at particular cells in the board array. For example, a run in the
